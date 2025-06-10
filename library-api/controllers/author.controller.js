@@ -1,14 +1,13 @@
 const db = require("../models");
 const Author = db.Author;
 const Book = db.Book;
+const logger = require('../logger/logger');
 
-// Создать нового автора
 // Создать одного или нескольких авторов
 exports.create = async (req, res) => {
   try {
     const authors = Array.isArray(req.body) ? req.body : [req.body];
 
-    // Проверим, что у каждого автора есть имя
     for (const author of authors) {
       if (!author.name) {
         return res.status(400).send({ message: "Name is required" });
@@ -16,11 +15,25 @@ exports.create = async (req, res) => {
     }
 
     const createdAuthors = await Author.bulkCreate(authors);
+
+    // Логируем чисто, без спецсимволов
+    logger.info(`Authors created: ${authors.map(a => a.name).join(', ')}`, {
+      service: 'nodejs-mysql-api',
+      action: 'create-authors',
+      count: authors.length,
+    });
+
     res.status(201).send(createdAuthors);
   } catch (err) {
+    logger.error(`Error creating authors: ${err.message}`, {
+      service: 'nodejs-mysql-api',
+      action: 'create-authors',
+    });
+
     res.status(500).send({ message: err.message });
   }
 };
+
 
 
 // Получить всех авторов
