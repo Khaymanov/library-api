@@ -1,0 +1,368 @@
+openapi: 3.0.3
+info:
+  title: Library Database - OpenAPI 3.0
+  description: |-
+    Restful API for managing database of books and authors
+  version: 1.0.0
+servers:
+  - url: http://localhost:3000
+    description: Локальный сервер (Docker или локально)
+tags:
+  - name: book
+    description: Information about books
+  - name: author
+    description: Information about authors
+paths:
+  /books:
+    post:
+      tags:
+        - book
+      summary: Add a new book to the library
+      operationId: addBook
+      requestBody:
+        description: Create a new book in the library
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Book'
+        required: true
+      responses:
+        '201':
+          description: Book successfully created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Book'
+        '400':
+          description: Invalid input
+        '422':
+          description: Validation exception
+      #security:
+        #- BearerAuth: []
+    get:
+      tags:
+        - book
+      summary: Get all books with details
+      operationId: getAllBooks
+      parameters:
+        - $ref: "#/components/parameters/offsetParam"
+        - $ref: "#/components/parameters/limitParam"
+        - name: category
+          in: query
+          description: Books categories that need to be considered for filter
+          required: false
+          schema:
+            type: string
+            enum:
+              - fiction novel
+              - biography
+              - historic novel
+              - horror
+              - detective story
+              - comedy
+              - fantasy
+              - mystery
+        - name: author
+          in: query
+          description: Book's author for filtering by author
+          required: false
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Book'
+        '400':
+          description: Invalid status value
+      #security:
+        #- BearerAuth: []
+  /book/{bookId}:
+    get:
+      tags:
+        - book
+      summary: Find book by ID
+      description: Returns a single book
+      operationId: getBookById
+      parameters:
+        - name: bookId
+          in: path
+          description: ID of book to return
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Book'
+        '400':
+          description: Invalid ID supplied
+        '404':
+          description: Book not found
+      #security:
+        #- BearerAuth: []
+    put:
+      tags:
+        - book
+      summary: Updates an existing book in the library
+      operationId: updateBook
+      parameters:
+        - name: bookId
+          in: path
+          description: ID of book that needs to be updated
+          required: true
+          schema:
+            type: integer
+            format: int64
+      requestBody:
+        description: Book attributes to update
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Book"
+      responses:
+        '200':
+          description: Successful update
+        '400':
+          description: Invalid input
+        '404':
+          description: Book not found
+      #security:
+        #- BearerAuth: []
+    delete:
+      tags:
+        - book
+      summary: Deletes a book by Id
+      operationId: deleteBook
+      parameters:
+        - name: bookId
+          in: path
+          description: Book id to delete
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '204':
+          description: Book successfully deleted
+        '400':
+          description: Invalid bookID value
+        '404':
+          description: bookID not found
+      #security:
+        #- BearerAuth: []
+  /authors:
+    post:
+      tags:
+        - author
+      summary: Create one or multiple authors
+      operationId: addAuthor
+      requestBody:
+        description: Create a new author in the library
+        content:
+          application/json:
+            schema:
+              oneOf:
+                - $ref: '#/components/schemas/Author'
+                - type: array
+                  items:
+                    $ref: '#/components/schemas/Author'
+        required: true
+      responses:
+        '201':
+          description: Author successfully created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Author'
+        '400':
+          description: Invalid input
+        '422':
+          description: Validation exception
+      #security:
+        #- BearerAuth: []
+    get:
+      tags:
+        - author
+      summary: Get all authors with details
+      operationId: getAuthors
+      parameters:
+        - $ref: "#/components/parameters/offsetParam"
+        - $ref: "#/components/parameters/limitParam"
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Author'
+        '400':
+          description: Invalid status value
+      #security:
+        #- BearerAuth: []
+  /authors/{authorId}:
+    get:
+      tags:
+        - author
+      summary: Find author by ID
+      description: Returns a single author
+      operationId: getAuthorById
+      parameters:
+        - name: authorId
+          in: path
+          description: ID of author to return
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Author'
+          links:
+            booksByAuthor:
+              $ref: '#/components/links/booksByAuthor'
+        '400':
+          description: Invalid ID supplied
+        '404':
+          description: Author not found
+      #security:
+        #- BearerAuth: []
+    put:
+      tags:
+        - author
+      summary: Updates an existing author in the library
+      operationId: updateAuthor
+      parameters:
+        - name: authorId
+          in: path
+          description: ID of author that needs to be updated
+          required: true
+          schema:
+            type: integer
+            format: int64
+      requestBody:
+        description: Create a new author in the library
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Author'
+        required: true
+      responses:
+        '200':
+          description: Successful update
+        '400':
+          description: Invalid input
+        '404':
+          description: Author not found
+      #security:
+        #- BearerAuth: []
+    delete:
+      tags:
+        - author
+      summary: Deletes an author by Id
+      operationId: deleteAuthor
+      parameters:
+        - name: authorId
+          in: path
+          description: Author id to delete
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '204':
+          description: Author successfully deleted
+        '400':
+          description: Invalid authorID value
+        '404':
+          description: authorID not found
+      #security:
+        #- BearerAuth: []
+components:
+  parameters:
+    offsetParam:
+      in: query
+      name: offset
+      required: false
+      schema:
+        type: integer
+        minimum: 0
+      description: The number of items to skip before starting to collect the result set.
+    limitParam:
+      in: query
+      name: limit
+      required: false
+      schema:
+        type: integer
+        minimum: 1
+        maximum: 50
+        default: 20
+      description: The number of items to return.
+  schemas:
+    Book:
+      required:
+        - title
+        - author_id
+        - category
+        - status
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+          example: 10
+        title:
+          type: string
+          example: War and Peace
+        author_id:
+          type: integer
+          format: int64
+          example: 1
+        category:
+          type: string
+          enum:
+            - fiction novel
+            - biography
+            - historic novel
+            - horror
+            - detective story
+            - comedy
+            - fantasy
+            - mystery
+        status:
+          type: string
+          description: book status in the library
+          default: available
+          enum:
+            - available
+            - taken
+    Author:
+      required:
+        - name
+      type: object
+      properties:
+        name:
+          type: string
+          example: Stephen King
+  links:
+    booksByAuthor:
+      operationId: getAllBooks
+      parameters:
+        author: $response.body#/name
+  #securitySchemes:
+    #BearerAuth:
