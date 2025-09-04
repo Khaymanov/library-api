@@ -33,6 +33,15 @@ services:
       - grafana-storage:/var/lib/grafana
     networks:
       - elk
+  
+  services:
+  my-service:
+    image: your-image
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
 
 volumes:
   grafana-storage:

@@ -5,7 +5,7 @@ info:
     Restful API for managing database of books and authors
   version: 1.0.0
 servers:
-  - url: http://localhost:3000
+  - url: http://localhost:3002
     description: Локальный сервер (Docker или локально)
 tags:
   - name: book
